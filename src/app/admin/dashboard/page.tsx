@@ -25,7 +25,10 @@ import {
   Menu,
   X,
   Server,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Key
 } from "lucide-react";
 import { DEFAULT_CMS_DATA, LandingCMSData } from "@/lib/cmsDefaults";
 import { db } from "@/lib/firebase";
@@ -43,6 +46,16 @@ export default function AdminDashboardPage() {
   const [healthData, setHealthData] = useState<any>(null);
   const [adminUser, setAdminUser] = useState("Chief Legal Counsel");
   const [telemetryMode, setTelemetryMode] = useState<"live" | "benchmark">("live");
+
+  // AI Gateway States
+  const [selectedModel, setSelectedModel] = useState<string>("nvidia/llama-3.1-nemotron-70b-instruct");
+  const [tavilyActive, setTavilyActive] = useState<boolean>(true);
+  const [nebiusKeyInput, setNebiusKeyInput] = useState<string>("");
+  const [tavilyKeyInput, setTavilyKeyInput] = useState<string>("");
+  const [showNebiusKey, setShowNebiusKey] = useState<boolean>(false);
+  const [showTavilyKey, setShowTavilyKey] = useState<boolean>(false);
+  const [savingGateway, setSavingGateway] = useState<boolean>(false);
+  const [gatewayMessage, setGatewayMessage] = useState<string>("");
 
   // Authentication Guard
   useEffect(() => {
@@ -109,6 +122,54 @@ export default function AdminDashboardPage() {
     }
     checkHealth();
   }, []);
+
+  // Load Gateway Settings from API / Firebase
+  useEffect(() => {
+    async function fetchGateway() {
+      try {
+        const res = await fetch("/api/gateway");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data) {
+            if (json.data.activeModel) setSelectedModel(json.data.activeModel);
+            if (typeof json.data.tavilyEnabled === "boolean") setTavilyActive(json.data.tavilyEnabled);
+            if (json.data.nebiusApiKey) setNebiusKeyInput(json.data.nebiusApiKey);
+            if (json.data.tavilyApiKey) setTavilyKeyInput(json.data.tavilyApiKey);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch gateway settings:", err);
+      }
+    }
+    fetchGateway();
+  }, []);
+
+  const handleSaveGateway = async () => {
+    setSavingGateway(true);
+    setGatewayMessage("");
+    try {
+      const res = await fetch("/api/gateway", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activeModel: selectedModel,
+          tavilyEnabled: tavilyActive,
+          nebiusApiKey: nebiusKeyInput,
+          tavilyApiKey: tavilyKeyInput,
+        }),
+      });
+      if (res.ok) {
+        setGatewayMessage("✅ AI Model Gateway & API Keys saved successfully to Firebase!");
+      } else {
+        setGatewayMessage("❌ Failed to save gateway settings.");
+      }
+    } catch (e: any) {
+      setGatewayMessage(`❌ Error: ${e.message}`);
+    } finally {
+      setSavingGateway(false);
+      setTimeout(() => setGatewayMessage(""), 5000);
+    }
+  };
 
   const handleSaveCMS = async () => {
     setSavingCms(true);
@@ -736,37 +797,88 @@ export default function AdminDashboardPage() {
         {/* TAB 4: AI GATEWAY & MODEL SETTINGS */}
         {activeTab === "gateway" && (
           <div className="space-y-6 max-w-3xl">
+            {gatewayMessage && (
+              <div className="p-4 rounded-xl bg-[#76b900]/20 border border-[#76b900]/40 text-[#76b900] font-mono text-xs flex items-center justify-between">
+                <span>{gatewayMessage}</span>
+              </div>
+            )}
+
+            {/* Model Selection */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="font-bold text-white text-base font-mono">PRIMARY INFERENCE MODEL</h3>
-              <p className="text-xs text-slate-400">
-                Select the NVIDIA Foundational Model hosted on Nebius Token Factory:
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-white text-base font-mono">PRIMARY INFERENCE MODEL</h3>
+                  <p className="text-xs text-slate-400">
+                    Click any model below to switch the active reasoning engine:
+                  </p>
+                </div>
+                <span className="text-[11px] font-mono text-[#76b900] bg-[#76b900]/10 border border-[#76b900]/30 px-2.5 py-1 rounded-full">
+                  Click to Switch
+                </span>
+              </div>
 
               <div className="space-y-3">
                 {[
-                  { id: "nvidia/llama-3.1-nemotron-70b-instruct", name: "NVIDIA Llama 3.1 Nemotron 70B Instruct", desc: "Flagship model with deep legal reasoning & NeMo Guardrails", active: true },
-                  { id: "nvidia/nemotron-4-340b-instruct", name: "NVIDIA Nemotron-4 340B Instruct", desc: "Ultra-scale enterprise compliance synthesis", active: false },
-                  { id: "meta/llama-3.1-405b-instruct", name: "Llama 3.1 405B Frontier", desc: "Max complexity legal analysis", active: false },
-                ].map((m) => (
-                  <div
-                    key={m.id}
-                    className={`p-4 rounded-xl border flex items-center justify-between ${
-                      m.active
-                        ? "border-[#76b900] bg-[#76b900]/10"
-                        : "border-slate-800 bg-black/40 opacity-60"
-                    }`}
-                  >
-                    <div>
-                      <div className="font-mono text-xs font-bold text-white">{m.name}</div>
-                      <div className="text-[11px] text-slate-400">{m.desc}</div>
-                    </div>
-                    {m.active && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#76b900] text-black">
-                        SELECTED
-                      </span>
-                    )}
-                  </div>
-                ))}
+                  { 
+                    id: "nvidia/llama-3.1-nemotron-70b-instruct", 
+                    name: "NVIDIA Llama 3.1 Nemotron 70B Instruct", 
+                    desc: "Flagship model with deep legal reasoning & NeMo Guardrails (Default Recommended)",
+                    badge: "Hackathon Core"
+                  },
+                  { 
+                    id: "nvidia/nemotron-4-340b-instruct", 
+                    name: "NVIDIA Nemotron-4 340B Instruct", 
+                    desc: "Ultra-scale enterprise compliance synthesis and statutory cross-referencing",
+                    badge: "Ultra Scale"
+                  },
+                  { 
+                    id: "meta/llama-3.1-405b-instruct", 
+                    name: "Llama 3.1 405B Frontier", 
+                    desc: "Maximum complexity multi-jurisdiction contract interpretation",
+                    badge: "Frontier"
+                  },
+                ].map((m) => {
+                  const isSelected = selectedModel === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSelectedModel(m.id)}
+                      className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${
+                        isSelected
+                          ? "border-[#76b900] bg-[#76b900]/15 shadow-[0_0_20px_rgba(118,185,0,0.2)]"
+                          : "border-slate-800 bg-black/40 hover:border-slate-700 hover:bg-slate-800/40"
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-mono text-xs font-bold ${isSelected ? "text-[#76b900]" : "text-white"}`}>
+                            {m.name}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                            {m.badge}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-sans leading-relaxed">
+                          {m.desc}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 ml-4">
+                        {isSelected ? (
+                          <span className="px-3 py-1 rounded-lg text-[10px] font-mono font-extrabold bg-[#76b900] text-black shadow-[0_0_10px_rgba(118,185,0,0.4)] flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            SELECTED
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 rounded-lg text-[10px] font-mono text-slate-400 border border-slate-700 hover:text-white">
+                            Select Model
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -777,13 +889,126 @@ export default function AdminDashboardPage() {
                   <h3 className="font-bold text-white text-base font-mono">TAVILY AI SEARCH INTEGRATION</h3>
                   <p className="text-xs text-slate-400">Qualifies project for the $3,000 Devpost Partner Bounty.</p>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-cyan-950/40 text-cyan-400 border border-cyan-500/30 text-xs font-mono font-bold">
-                  Active
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setTavilyActive(!tavilyActive)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 ${
+                    tavilyActive
+                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,240,255,0.2)]"
+                      : "bg-slate-800 text-slate-500 border border-slate-700"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${tavilyActive ? "bg-cyan-400 animate-pulse" : "bg-slate-500"}`} />
+                  <span>{tavilyActive ? "TAVILY ACTIVE" : "TAVILY DISABLED"}</span>
+                </button>
               </div>
               <p className="text-xs text-slate-300 font-mono">
-                When an audit flags high risk indemnity or statutory conflict, Tavily queries real-time case law from Delaware Courts, SEC disclosures, and Cornell Law LII.
+                When enabled, flagged indemnity traps trigger live statutory searches across Delaware Court of Chancery, SEC EDGAR disclosures, and Cornell Legal Information Institute.
               </p>
+            </div>
+
+            {/* API Keys Configuration Card */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-white text-base font-mono flex items-center gap-2">
+                    <Key className="w-4 h-4 text-[#76b900]" />
+                    API CREDENTIALS GATEWAY
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Connect your live keys directly through this admin panel (saved securely to Firestore).
+                  </p>
+                </div>
+              </div>
+
+              {/* Nebius API Key Field */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                    <Cpu className="w-3.5 h-3.5 text-[#76b900]" />
+                    Nebius Token Factory API Key
+                  </label>
+                  <a
+                    href="https://studio.nebius.ai/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-mono text-[#76b900] hover:underline flex items-center gap-1"
+                  >
+                    <span>Get Free Key (studio.nebius.ai)</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showNebiusKey ? "text" : "password"}
+                    value={nebiusKeyInput}
+                    onChange={(e) => setNebiusKeyInput(e.target.value)}
+                    placeholder="Enter Nebius API key (e.g. tok_... or API key)"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-slate-700 focus:border-[#76b900] text-slate-100 font-mono text-xs focus:outline-none pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNebiusKey(!showNebiusKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showNebiusKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  * If blank, system automatically runs on Autonomous NeMo Reasoning Fallback with zero downtime.
+                </p>
+              </div>
+
+              {/* Tavily API Key Field */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                    <Search className="w-3.5 h-3.5 text-cyan-400" />
+                    Tavily AI Search API Key ($3K Bounty)
+                  </label>
+                  <a
+                    href="https://tavily.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-mono text-cyan-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Get 1,000 Free Searches (tavily.com)</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showTavilyKey ? "text" : "password"}
+                    value={tavilyKeyInput}
+                    onChange={(e) => setTavilyKeyInput(e.target.value)}
+                    placeholder="Enter Tavily API key (e.g. tvly-...)"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-slate-700 focus:border-cyan-400 text-slate-100 font-mono text-xs focus:outline-none pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowTavilyKey(!showTavilyKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showTavilyKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  * Provides live grounding in real-time Delaware Court rulings and statutory regulations.
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-2 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveGateway}
+                  disabled={savingGateway}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#76b900] to-[#599100] hover:bg-[#88d600] text-black font-mono font-bold text-xs uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(118,185,0,0.3)] transition-all"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingGateway ? "Saving Configuration..." : "Save & Apply AI Gateway Settings"}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

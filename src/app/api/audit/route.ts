@@ -9,10 +9,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Contract text cannot be empty." }, { status: 400 });
     }
 
-    const nebiusApiKey = process.env.NEBIUS_API_KEY;
-    const tavilyApiKey = process.env.TAVILY_API_KEY;
+    let nebiusApiKey = process.env.NEBIUS_API_KEY;
+    let tavilyApiKey = process.env.TAVILY_API_KEY;
     const nebiusBaseUrl = process.env.NEBIUS_BASE_URL || "https://api.studio.nebius.ai/v1";
-    const nebiusModel = process.env.NEBIUS_MODEL || "nvidia/llama-3.1-nemotron-70b-instruct";
+    let nebiusModel = process.env.NEBIUS_MODEL || "nvidia/llama-3.1-nemotron-70b-instruct";
+
+    // Read dynamic settings from Firebase Firestore gateway_settings if configured
+    try {
+      const { db } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const snap = await getDoc(doc(db, "nemoguard_cms", "gateway_settings"));
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.nebiusApiKey && data.nebiusApiKey.trim().length > 5) {
+          nebiusApiKey = data.nebiusApiKey.trim();
+        }
+        if (data.tavilyApiKey && data.tavilyApiKey.trim().length > 5) {
+          tavilyApiKey = data.tavilyApiKey.trim();
+        }
+        if (data.activeModel) {
+          nebiusModel = data.activeModel;
+        }
+      }
+    } catch (e) {
+      // Continue with env vars
+    }
 
     let tavilyPrecedents: any[] = [];
 
