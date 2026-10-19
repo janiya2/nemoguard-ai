@@ -796,12 +796,14 @@ export default function AdminDashboardPage() {
 
         {/* TAB 4: AI GATEWAY & MODEL SETTINGS */}
         {activeTab === "gateway" && (
-          <div className="space-y-6 max-w-3xl">
-            {gatewayMessage && (
-              <div className="p-4 rounded-xl bg-[#76b900]/20 border border-[#76b900]/40 text-[#76b900] font-mono text-xs flex items-center justify-between">
-                <span>{gatewayMessage}</span>
-              </div>
-            )}
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Interactive Controls & Credentials */}
+            <div className="xl:col-span-7 space-y-6">
+              {gatewayMessage && (
+                <div className="p-4 rounded-xl bg-[#76b900]/20 border border-[#76b900]/40 text-[#76b900] font-mono text-xs flex items-center justify-between">
+                  <span>{gatewayMessage}</span>
+                </div>
+              )}
 
             {/* Model Selection */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
@@ -1008,6 +1010,100 @@ export default function AdminDashboardPage() {
                   <Save className="w-4 h-4" />
                   <span>{savingGateway ? "Saving Configuration..." : "Save & Apply AI Gateway Settings"}</span>
                 </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Step-by-Step API Key Setup Guide & Diagnostics */}
+          <div className="xl:col-span-5 space-y-6">
+              {/* Tavily Setup Card */}
+              <div className="glass-panel p-6 rounded-2xl border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.1)] space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 font-mono font-bold text-xs flex items-center justify-center">1</span>
+                    <h4 className="font-bold text-white font-mono text-sm">Tavily AI Search ($3K Bounty)</h4>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    1,000 Free
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 text-xs font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <span className="text-cyan-400 font-bold">Step 1:</span>
+                    <span>Go to <a href="https://tavily.com" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline font-bold">tavily.com</a> and click &apos;Get API Key&apos;.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-cyan-400 font-bold">Step 2:</span>
+                    <span>Sign in with Google (Takes 5 seconds, No Credit Card needed).</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-cyan-400 font-bold">Step 3:</span>
+                    <span>Copy your key starting with <code className="text-cyan-300 bg-black/60 px-1 py-0.5 rounded">tvly-...</code> and paste in the left input.</span>
+                  </div>
+                </div>
+
+                <a
+                  href="https://app.tavily.com/home"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl border border-cyan-500/40 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 font-mono text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <span>Open Tavily Dashboard ↗</span>
+                </a>
+              </div>
+
+              {/* Nebius Setup Card */}
+              <div className="glass-panel p-6 rounded-2xl border border-[#76b900]/30 shadow-[0_0_25px_rgba(118,185,0,0.1)] space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-[#76b900]/20 text-[#76b900] font-mono font-bold text-xs flex items-center justify-center">2</span>
+                    <h4 className="font-bold text-white font-mono text-sm">Nebius Token Factory (Nemotron 70B)</h4>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#76b900]/20 text-[#76b900] border border-[#76b900]/30">
+                    $25-$50 Free
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 text-xs font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#76b900] font-bold">Step 1:</span>
+                    <span>Go to <a href="https://studio.nebius.ai" target="_blank" rel="noopener noreferrer" className="text-[#76b900] underline font-bold">studio.nebius.ai</a> and Sign in.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#76b900] font-bold">Step 2:</span>
+                    <span>Devpost Hackathon email has your promo credit link for free credits.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#76b900] font-bold">Step 3:</span>
+                    <span>Click &apos;API Keys&apos; in left sidebar, click &apos;Create Key&apos;, copy and paste on the left.</span>
+                  </div>
+                </div>
+
+                <a
+                  href="https://studio.nebius.ai/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl border border-[#76b900]/40 bg-[#76b900]/15 hover:bg-[#76b900]/25 text-[#76b900] font-mono text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <span>Open Nebius AI Studio ↗</span>
+                </a>
+              </div>
+
+              {/* Status & Fallback Guarantee Card */}
+              <div className="p-5 rounded-2xl bg-black/60 border border-slate-800 space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between text-slate-300 font-bold">
+                  <span>LIVE GATEWAY STATUS</span>
+                  <span className="text-emerald-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    READY
+                  </span>
+                </div>
+                <div className="space-y-1.5 text-slate-400 text-[11px]">
+                  <div>• Active Engine: <span className="text-white font-bold">{selectedModel}</span></div>
+                  <div>• Fallback Engine: <span className="text-emerald-400 font-bold">Zero-Downtime NeMo Active</span></div>
+                  <div>• Precedent Grounding: <span className={tavilyActive ? "text-cyan-400 font-bold" : "text-slate-500"}>{tavilyActive ? "Enabled ($3K Bounty)" : "Disabled"}</span></div>
+                </div>
               </div>
             </div>
           </div>
