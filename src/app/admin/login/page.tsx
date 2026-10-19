@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Shield, Lock, Key, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Shield, Lock, Key, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -28,19 +28,10 @@ export default function AdminLoginPage() {
         }
         router.push("/admin/dashboard");
       } else {
-        setError("Invalid credentials. Try demo passkey 'nemoguard2026' or click One-Click Demo Access.");
+        setError("Invalid credentials. Please verify your admin master passkey.");
         setLoading(false);
       }
     }, 600);
-  };
-
-  const handleOneClickDemo = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("nemoguard_admin_authenticated", "true");
-      localStorage.setItem("nemoguard_admin_user", "chief-counsel@nemoguard.ai");
-      localStorage.setItem("nemoguard_admin_login_time", new Date().toISOString());
-    }
-    router.push("/admin/dashboard");
   };
 
   return (
@@ -124,17 +115,6 @@ export default function AdminLoginPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Bypass for Hackathon Reviewers */}
-          <div className="pt-2 border-t border-slate-800">
-            <button
-              onClick={handleOneClickDemo}
-              className="w-full py-2.5 rounded-xl text-xs font-mono font-semibold tracking-wide border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-950/40 text-cyan-300 transition-all flex items-center justify-center gap-2"
-            >
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-              <span>One-Click Demo Passkey (Instant Access)</span>
-            </button>
-          </div>
 
           <div className="text-center pt-2">
             <Link href="/" className="text-xs text-slate-400 hover:text-white font-mono">
