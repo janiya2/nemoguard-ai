@@ -24,7 +24,8 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-nvidia-400/20 bg-[#05080c]/85 backdrop-blur-xl">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 w-full h-16 border-b border-[#76b900]/25 bg-[#05080c]/90 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -127,6 +128,9 @@ export default function Navbar() {
           </Link>
         </div>
       )}
-    </header>
+      </header>
+      {/* Fixed Header Spacer to prevent content overlap */}
+      <div className="h-16 w-full shrink-0" aria-hidden="true" />
+    </>
   );
 }
