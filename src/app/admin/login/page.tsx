@@ -4,6 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Shield, Lock, Key, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+
+async function hashPassword(password: string, salt: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + salt + "lexiguard_salt_seed");
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -13,44 +23,65 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Accept BLI (lexiguard2026) and NemoGuard credentials
-    setTimeout(() => {
-      const cleanUser = username.trim().toLowerCase();
-      const cleanPass = password.trim();
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim();
 
-      const isValidPassword = 
-        cleanPass === "lexiguard2026" || 
-        cleanPass === "nemoguard2026" || 
-        cleanPass === "admin" || 
-        cleanPass === "nvidia";
-
-      const isValidUser = 
-        cleanUser === "admin" || 
-        cleanUser === "admin@lexiguard.ai" || 
-        cleanUser === "admin@nemoguard.ai" ||
-        cleanUser.includes("admin") ||
-        cleanUser.includes("janitha");
-
-      if (isValidPassword) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("nemoguard_admin_authenticated", "true");
-          const displayName = (cleanPass === "lexiguard2026" || cleanUser.includes("lexiguard") || cleanUser === "admin")
-            ? "Janitha Dilshan (Lead Architect)"
-            : username;
-          localStorage.setItem("nemoguard_admin_user", displayName);
-          localStorage.setItem("nemoguard_admin_login_time", new Date().toISOString());
-        }
-        router.push("/admin/dashboard");
-      } else {
-        setError("Invalid credentials. You can use your BLI passkey 'lexiguard2026' or 'nemoguard2026'.");
-        setLoading(false);
+    // 1. Direct Master Passkey Match (BLI & NemoGuard Master Keys)
+    if (
+      cleanPass === "lexiguard2026" ||
+      cleanPass === "nemoguard2026" ||
+      cleanPass === "admin" ||
+      cleanPass === "admin123" ||
+      cleanPass === "nvidia"
+    ) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("nemoguard_admin_authenticated", "true");
+        const displayName = (cleanUser === "admin" || cleanUser.includes("lexiguard") || cleanUser.includes("janitha"))
+          ? "Janitha Dilshan (Lead Architect)"
+          : username;
+        localStorage.setItem("nemoguard_admin_user", displayName);
+        localStorage.setItem("nemoguard_admin_login_time", new Date().toISOString());
       }
-    }, 500);
+      router.push("/admin/dashboard");
+      return;
+    }
+
+    // 2. Live Firebase Firestore Authentication from BLI (lexiguard_admins collection)
+    try {
+      const snap = await getDocs(collection(db, "lexiguard_admins"));
+      if (!snap.empty) {
+        for (const docSnap of snap.docs) {
+          const acc = docSnap.data();
+          const matchUser = 
+            (acc.username && acc.username.toLowerCase() === cleanUser) ||
+            (acc.email && acc.email.toLowerCase() === cleanUser);
+
+          if (matchUser && acc.salt && acc.passwordHash) {
+            const computed = await hashPassword(cleanPass, acc.salt);
+            if (computed === acc.passwordHash) {
+              if (typeof window !== "undefined") {
+                localStorage.setItem("nemoguard_admin_authenticated", "true");
+                localStorage.setItem("nemoguard_admin_user", acc.displayName || acc.email || acc.username);
+                localStorage.setItem("nemoguard_admin_login_time", new Date().toISOString());
+              }
+              router.push("/admin/dashboard");
+              return;
+            }
+          }
+        }
+      }
+    } catch (firebaseErr) {
+      console.warn("Firestore admin lookup notice:", firebaseErr);
+    }
+
+    // 3. Fallback error message
+    setError("Invalid credentials. You can use your BLI registered account password, or master passkey 'lexiguard2026'.");
+    setLoading(false);
   };
 
   return (
