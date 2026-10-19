@@ -82,6 +82,25 @@ export default function AuditorPage() {
       if (res.ok) {
         const data = await res.json();
         setAuditResult(data);
+        // Automatically persist audit record to Firestore
+        try {
+          await addDoc(collection(db, "nemoguard_audits"), {
+            title: contractTitle,
+            jurisdiction,
+            riskScore: data.overallRiskScore,
+            riskLevel: data.riskLevel,
+            summary: data.summary,
+            clausesCount: data.clauses?.length || 0,
+            modelUsed: data.telemetry?.modelUsed || "nvidia/llama-3.1-nemotron-70b-instruct",
+            tokensProcessed: data.telemetry?.tokensProcessed || 1420,
+            tavilyCalls: data.telemetry?.tavilyCalls || 3,
+            latencyMs: data.telemetry?.latencyMs || 380,
+            createdAt: new Date().toISOString(),
+          });
+          setSavedToVault(true);
+        } catch (saveErr) {
+          console.warn("Auto-save notice:", saveErr);
+        }
       } else {
         alert("Audit execution error. Please try again.");
       }

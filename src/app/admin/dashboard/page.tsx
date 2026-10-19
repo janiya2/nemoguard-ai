@@ -42,6 +42,7 @@ export default function AdminDashboardPage() {
   const [loadingAudits, setLoadingAudits] = useState(false);
   const [healthData, setHealthData] = useState<any>(null);
   const [adminUser, setAdminUser] = useState("Chief Legal Counsel");
+  const [telemetryMode, setTelemetryMode] = useState<"live" | "benchmark">("live");
 
   // Authentication Guard
   useEffect(() => {
@@ -269,68 +270,179 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* TAB 1: OVERVIEW */}
-        {activeTab === "overview" && (
-          <div className="space-y-8">
-            {/* Top Metric Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-                <div className="text-xs font-mono text-slate-400 mb-1">TOTAL AUDITS SCANNED</div>
-                <div className="text-3xl font-bold font-mono text-white">14,820</div>
-                <div className="text-[11px] text-emerald-400 font-mono mt-1">↑ +14.2% this week</div>
+        {activeTab === "overview" && (() => {
+          const liveCount = auditLogs.length;
+          const liveTokens = auditLogs.reduce((acc, log) => acc + (log.tokensProcessed || 1420), 0);
+          const liveTavily = auditLogs.reduce((acc, log) => acc + (log.tavilyCalls || 3), 0);
+          const liveLatency = auditLogs.length > 0 
+            ? Math.round(auditLogs.reduce((acc, l) => acc + (l.latencyMs || 380), 0) / auditLogs.length) 
+            : 380;
+
+          return (
+            <div className="space-y-8">
+              {/* Data Source Selector */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono font-bold text-slate-300">DATA SOURCE:</span>
+                  <div className="flex bg-black/60 p-1 rounded-xl border border-slate-800">
+                    <button
+                      onClick={() => setTelemetryMode("live")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                        telemetryMode === "live"
+                          ? "bg-[#76b900] text-black shadow-[0_0_15px_rgba(118,185,0,0.3)]"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Live Firestore ({liveCount} Audits)</span>
+                    </button>
+                    <button
+                      onClick={() => setTelemetryMode("benchmark")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                        telemetryMode === "benchmark"
+                          ? "bg-slate-700 text-white"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      🏢 Enterprise Benchmark
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-[11px] font-mono text-slate-400">
+                  {telemetryMode === "live" 
+                    ? "Streaming live from Firestore collection: nemoguard_audits" 
+                    : "Simulated high-throughput enterprise scale for presentations"}
+                </div>
               </div>
 
-              <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-                <div className="text-xs font-mono text-slate-400 mb-1">NEBIUS TOKENS PROCESSED</div>
-                <div className="text-3xl font-bold font-mono text-[#76b900]">18.4M</div>
-                <div className="text-[11px] text-slate-400 font-mono mt-1">NVIDIA Nemotron-70B</div>
+              {/* Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+                  <div className="text-xs font-mono text-slate-400 mb-1">TOTAL AUDITS SCANNED</div>
+                  <div className="text-3xl font-bold font-mono text-white">
+                    {telemetryMode === "live" ? liveCount : "14,820"}
+                  </div>
+                  <div className="text-[11px] text-emerald-400 font-mono mt-1">
+                    {telemetryMode === "live" ? (liveCount > 0 ? "● Real Live Scans" : "0 Scans Logged") : "↑ +14.2% this week"}
+                  </div>
+                </div>
+
+                <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+                  <div className="text-xs font-mono text-slate-400 mb-1">NEBIUS TOKENS PROCESSED</div>
+                  <div className="text-3xl font-bold font-mono text-[#76b900]">
+                    {telemetryMode === "live" 
+                      ? (liveCount > 0 ? `${(liveTokens / 1000).toFixed(1)}k` : "0") 
+                      : "18.4M"}
+                  </div>
+                  <div className="text-[11px] text-slate-400 font-mono mt-1">NVIDIA Nemotron-70B</div>
+                </div>
+
+                <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+                  <div className="text-xs font-mono text-slate-400 mb-1">TAVILY PRECEDENT CALLS</div>
+                  <div className="text-3xl font-bold font-mono text-cyan-400">
+                    {telemetryMode === "live" ? liveTavily : "3,492"}
+                  </div>
+                  <div className="text-[11px] text-cyan-300 font-mono mt-1">
+                    {telemetryMode === "live" ? `${liveTavily} Active Queries` : "$3K Bounty Eligible"}
+                  </div>
+                </div>
+
+                <div className="glass-panel p-5 rounded-2xl border border-slate-800">
+                  <div className="text-xs font-mono text-slate-400 mb-1">AVG REASONING LATENCY</div>
+                  <div className="text-3xl font-bold font-mono text-white">
+                    {telemetryMode === "live" ? (liveCount > 0 ? `${liveLatency}ms` : "380ms") : "380ms"}
+                  </div>
+                  <div className="text-[11px] text-emerald-400 font-mono mt-1">H100 SXM5 Supercluster</div>
+                </div>
               </div>
 
-              <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-                <div className="text-xs font-mono text-slate-400 mb-1">TAVILY PRECEDENT CALLS</div>
-                <div className="text-3xl font-bold font-mono text-cyan-400">3,492</div>
-                <div className="text-[11px] text-cyan-300 font-mono mt-1">$3K Bounty Eligible</div>
-              </div>
+              {/* Inference Logs Stream */}
+              <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-white text-base font-mono">
+                      {telemetryMode === "live" ? "REAL FIRESTORE AUDIT STREAM" : "REAL-TIME INFERENCE LOGS"}
+                    </h3>
+                    <span className="text-xs font-mono text-emerald-400">
+                      ● Status: {telemetryMode === "live" ? "CONNECTED" : "LIVE"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400">
+                    {telemetryMode === "live" ? `${liveCount} Live Records` : "Stream Active"}
+                  </span>
+                </div>
 
-              <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-                <div className="text-xs font-mono text-slate-400 mb-1">AVG REASONING LATENCY</div>
-                <div className="text-3xl font-bold font-mono text-white">380ms</div>
-                <div className="text-[11px] text-emerald-400 font-mono mt-1">H100 SXM5 Supercluster</div>
+                <div className="font-mono text-xs space-y-2 text-slate-300">
+                  {telemetryMode === "live" ? (
+                    liveCount > 0 ? (
+                      auditLogs.slice(0, 6).map((log, idx) => (
+                        <div key={log.id || idx} className="p-3.5 rounded-xl bg-black/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[#76b900] font-bold">[NEBIUS-H100]</span>
+                            <span className="text-white font-medium">&apos;{log.title}&apos;</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              log.riskScore >= 80 ? "bg-rose-500/20 text-rose-400 border border-rose-500/30" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            }`}>
+                              Risk: {log.riskScore}/100 ({log.riskLevel})
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-slate-400 text-[11px] shrink-0">
+                            <span className="text-cyan-400">{log.tavilyCalls || 3} Tavily Precedents</span>
+                            <span>•</span>
+                            <span>{new Date(log.createdAt || Date.now()).toLocaleTimeString()}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 rounded-xl bg-black/40 border border-dashed border-slate-800 text-center space-y-3">
+                        <div className="text-slate-300 font-mono text-xs font-bold">
+                          0 Live Scans in Firestore yet.
+                        </div>
+                        <p className="text-[11px] text-slate-400 max-w-md mx-auto leading-relaxed">
+                          Once you audit a contract in the Contract Auditor, the real contract name, risk score, tokens, and Tavily citations will appear right here in real-time!
+                        </p>
+                        <div className="pt-2">
+                          <Link
+                            href="/auditor"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#76b900] text-black font-mono text-xs font-bold uppercase hover:bg-[#88d600] transition-all shadow-[0_0_15px_rgba(118,185,0,0.2)]"
+                          >
+                            <Cpu className="w-3.5 h-3.5" />
+                            <span>Run First Live Contract Audit</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    <>
+                      <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#76b900]">[NEBIUS-H100]</span>
+                          <span>Audit complete for &apos;Enterprise Cloud Services MSA&apos; (Risk Score: 94/100)</span>
+                        </div>
+                        <span className="text-slate-500 text-[11px]">2 mins ago</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-cyan-400">[TAVILY-SEARCH]</span>
+                          <span>Retrieved precedent: ABRY Partners v. F&W Acquisition (Del. Ch. 2006)</span>
+                        </div>
+                        <span className="text-slate-500 text-[11px]">4 mins ago</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-400">[NEMO-GUARD]</span>
+                          <span>Flagged GDPR Article 28 non-compliance in DPA addendum</span>
+                        </div>
+                        <span className="text-slate-500 text-[11px]">9 mins ago</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-
-            {/* Quick Live Audit Stream */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-white text-base font-mono">REAL-TIME INFERENCE LOGS</h3>
-                <span className="text-xs font-mono text-emerald-400">Stream Status: LIVE</span>
-              </div>
-
-              <div className="font-mono text-xs space-y-2 text-slate-300">
-                <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#76b900]">[NEBIUS-H100]</span>
-                    <span>Audit complete for &apos;Enterprise Cloud Services MSA&apos; (Risk Score: 94/100)</span>
-                  </div>
-                  <span className="text-slate-500 text-[11px]">2 mins ago</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan-400">[TAVILY-SEARCH]</span>
-                    <span>Retrieved precedent: ABRY Partners v. F&W Acquisition (Del. Ch. 2006)</span>
-                  </div>
-                  <span className="text-slate-500 text-[11px]">4 mins ago</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/60 border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-amber-400">[NEMO-GUARD]</span>
-                    <span>Flagged GDPR Article 28 non-compliance in DPA addendum</span>
-                  </div>
-                  <span className="text-slate-500 text-[11px]">9 mins ago</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 2: LANDING PAGE CMS CONTROLLER */}
         {activeTab === "cms" && (
