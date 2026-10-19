@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   keywords: ["NVIDIA Nemotron", "Nebius AI", "Legal AI", "Contract Redlining", "Tavily Search", "NeMo Guardrails"],
 };
 
+import { AuthProvider } from "@/lib/authContext";
+import MobileBottomNav from "@/components/MobileBottomNav";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,9 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased min-h-screen flex flex-col bg-[#05080c] text-slate-100">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1 pb-16 md:pb-0">{children}</main>
+          <Footer />
+          <MobileBottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

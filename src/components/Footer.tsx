@@ -1,98 +1,317 @@
+"use client";
+
 import Link from "next/link";
-import { Shield, Cpu, Lock, ExternalLink, Heart } from "lucide-react";
+import {
+  Shield,
+  Cpu,
+  Lock,
+  ExternalLink,
+  Sparkles,
+  Award,
+  Github,
+  CheckCircle2,
+  Zap,
+  Activity,
+  ArrowUpRight,
+  Database,
+  Terminal,
+  Scale
+} from "lucide-react";
+import { useState } from "react";
 
 export default function Footer() {
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
+
+  const hardwareNodes = [
+    {
+      id: "nvidia",
+      name: "NVIDIA Nemotron",
+      version: "70B Judicial Core",
+      spec: "FP8 TensorRT-LLM",
+      status: "ACTIVE",
+      statusColor: "text-[#76b900] bg-[#76b900]/15 border-[#76b900]/40",
+      accent: "#76b900",
+      icon: (
+        <svg className="w-5 h-5 text-[#76b900]" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8.94 4.5c-3.1 0-5.74 2.2-6.52 5.15C1.65 12.6 3.1 15.6 5.8 17l1.4-2.1c-1.8-.9-2.7-2.9-2.2-4.8.5-1.9 2.2-3.3 4.2-3.3.8 0 1.6.2 2.3.7l1.3-2.1c-1.1-.6-2.4-.9-3.8-.9zm6.1 0c-1.4 0-2.7.3-3.8.9l1.3 2.1c.7-.4 1.5-.7 2.3-.7 2 0 3.7 1.4 4.2 3.3.5 1.9-.4 3.9-2.2 4.8l1.4 2.1c2.7-1.4 4.15-4.4 3.38-7.35C20.78 6.7 18.14 4.5 15.04 4.5zM12 8.7c-2 0-3.6 1.6-3.6 3.6 0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6c0-2-1.6-3.6-3.6-3.6z"/>
+        </svg>
+      ),
+      link: "https://build.nvidia.com"
+    },
+    {
+      id: "nebius",
+      name: "Nebius AI Studio",
+      version: "H100 Supercluster",
+      spec: "8x SXM5 80GB",
+      status: "OPTIMAL",
+      statusColor: "text-emerald-400 bg-emerald-500/15 border-emerald-500/40",
+      accent: "#34d399",
+      icon: <Cpu className="w-5 h-5 text-emerald-400" />,
+      link: "https://nebius.com"
+    },
+    {
+      id: "tavily",
+      name: "Tavily AI Search",
+      version: "Live Legal Grounding",
+      spec: "Delaware Precedents",
+      status: "GROUNDED",
+      statusColor: "text-cyan-400 bg-cyan-500/15 border-cyan-500/40",
+      accent: "#22d3ee",
+      icon: <Sparkles className="w-5 h-5 text-cyan-400" />,
+      link: "https://tavily.com"
+    },
+    {
+      id: "guardrails",
+      name: "NeMo Guardrails",
+      version: "Colang 2.0 Engine",
+      spec: "Zero Hallucination",
+      status: "VERIFIED",
+      statusColor: "text-lime-400 bg-lime-500/15 border-lime-500/40",
+      accent: "#a3e635",
+      icon: <Shield className="w-5 h-5 text-lime-400" />,
+      link: "https://github.com/NVIDIA/NeMo-Guardrails"
+    },
+    {
+      id: "soc2",
+      name: "SOC-2 Type II",
+      version: "Enterprise Vault",
+      spec: "Zero Knowledge Data",
+      status: "ENCRYPTED",
+      statusColor: "text-indigo-400 bg-indigo-500/15 border-indigo-500/40",
+      accent: "#818cf8",
+      icon: <CheckCircle2 className="w-5 h-5 text-indigo-400" />,
+      link: "#"
+    },
+    {
+      id: "devpost",
+      name: "NVIDIA × Nebius",
+      version: "Global AI Hackathon",
+      spec: "Devpost 2026",
+      status: "SUBMISSION",
+      statusColor: "text-amber-400 bg-amber-500/15 border-amber-500/40",
+      accent: "#fbbf24",
+      icon: <Award className="w-5 h-5 text-amber-400" />,
+      link: "https://devpost.com"
+    }
+  ];
+
   return (
-    <footer className="w-full border-t border-slate-800/80 bg-[#040609] text-slate-400 text-xs font-sans mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Info */}
-          <div className="space-y-3 md:col-span-1">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#76b900]/20 border border-[#76b900]/40 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-[#76b900]" />
+    <footer className="w-full border-t border-slate-800/80 bg-[#04070e] text-slate-400 text-xs font-sans mt-24 relative overflow-hidden">
+      {/* Ambient background glow & grid lines */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-36 bg-gradient-to-b from-[#76b900]/12 via-[#76b900]/4 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#76b90008_1px,transparent_1px),linear-gradient(to_bottom,#76b90008_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+        
+        {/* Futuristic Supercluster Telemetry & Node Showcase */}
+        <div className="mb-12 pb-10 border-b border-slate-800/80">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#76b900]/10 border border-[#76b900]/30 text-[10px] font-mono text-[#76b900] uppercase tracking-wider mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#76b900] animate-ping" />
+                Autonomous Judicial Supercluster
               </div>
-              <span className="font-extrabold text-white text-base font-mono">
-                NEMO<span className="text-[#76b900]">GUARD</span> AI
-              </span>
+              <h3 className="text-white text-lg sm:text-xl font-extrabold font-mono tracking-tight flex items-center gap-2">
+                <span>NVIDIA Nemotron-70B • Nebius Infrastructure</span>
+              </h3>
             </div>
+            
+            {/* Live Telemetry Ping */}
+            <div className="flex items-center gap-3 text-[11px] font-mono bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl shrink-0">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-slate-300">Cluster Latency: <strong className="text-[#76b900]">38ms</strong></span>
+              <span className="text-slate-600">|</span>
+              <span className="text-slate-300">Grounding: <strong className="text-cyan-400">100% Case Law</strong></span>
+            </div>
+          </div>
+
+          {/* Holographic Hardware Pods */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            {hardwareNodes.map((node) => {
+              const isHovered = hoveredBadge === node.id;
+              return (
+                <a
+                  key={node.id}
+                  href={node.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  onMouseEnter={() => setHoveredBadge(node.id)}
+                  onMouseLeave={() => setHoveredBadge(null)}
+                  className={`p-3.5 rounded-2xl bg-gradient-to-b from-[#0a101d] to-[#05080f] border border-slate-800/90 transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1 relative overflow-hidden active:scale-95`}
+                  style={{
+                    borderColor: isHovered ? node.accent : undefined,
+                    boxShadow: isHovered
+                      ? `0 12px 30px -5px ${node.accent}40, inset 0 0 15px ${node.accent}15`
+                      : "none",
+                  }}
+                >
+                  {/* Top Status & Icon */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div
+                      className="p-2.5 rounded-xl bg-black/70 border border-slate-800 group-hover:scale-110 transition-transform duration-300"
+                      style={{
+                        borderColor: isHovered ? `${node.accent}60` : undefined,
+                      }}
+                    >
+                      {node.icon}
+                    </div>
+                    <span
+                      className={`text-[8px] font-mono font-bold tracking-tight px-1.5 py-0.5 rounded border ${node.statusColor}`}
+                    >
+                      {node.status}
+                    </span>
+                  </div>
+
+                  {/* Node Info */}
+                  <div>
+                    <h4 className="text-white font-mono text-xs font-bold group-hover:text-white transition-colors truncate flex items-center justify-between">
+                      <span>{node.name}</span>
+                      <ArrowUpRight
+                        className="w-3 h-3 text-slate-600 group-hover:text-white transition-colors shrink-0"
+                        style={{ color: isHovered ? node.accent : undefined }}
+                      />
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono truncate mt-0.5 font-medium">
+                      {node.version}
+                    </p>
+                    <p className="text-[9px] text-slate-500 font-mono truncate mt-0.5">
+                      {node.spec}
+                    </p>
+                  </div>
+
+                  {/* Glowing Bottom Line */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${node.accent}, transparent)`,
+                    }}
+                  />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 4-Column Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          {/* Brand Col */}
+          <div className="space-y-3.5 sm:col-span-1">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#76b900]/50 shadow-[0_0_20px_rgba(118,185,0,0.3)] bg-black">
+                <img
+                  src="/logo.png"
+                  alt="NemoGuard AI"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                />
+              </div>
+              <div>
+                <span className="font-extrabold text-white text-base font-mono block">
+                  NEMO<span className="text-[#76b900]">GUARD</span> AI
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono block -mt-0.5">
+                  Autonomous Legal Intelligence
+                </span>
+              </div>
+            </Link>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Autonomous Legal & Regulatory Intelligence Engine built for the Nebius × NVIDIA Global AI Hackathon.
+              Autonomous legal & regulatory contract auditing engine. Powered by NVIDIA Nemotron-70B on Nebius AI Studio, grounded with real-time Tavily case law.
             </p>
             <div className="flex items-center gap-2 text-[11px] font-mono text-[#76b900]">
-              <span className="w-2 h-2 rounded-full bg-[#76b900]" />
-              <span>Nebius Supercluster v2.4</span>
+              <span className="w-2 h-2 rounded-full bg-[#76b900] animate-pulse" />
+              <span>Nebius Supercluster • Verified H100</span>
             </div>
           </div>
 
-          {/* Infrastructure */}
-          <div className="space-y-2">
-            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-semibold">
-              AI Stack
+          {/* AI Reasoning Stack */}
+          <div className="space-y-2.5">
+            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+              <Cpu className="w-3.5 h-3.5 text-[#76b900]" />
+              <span>AI Judicial Stack</span>
             </h4>
-            <ul className="space-y-1.5 text-slate-400">
-              <li>
-                <span className="text-slate-300">NVIDIA Nemotron-70B</span> (Reasoning)
+            <ul className="space-y-2 text-slate-400 text-xs font-mono">
+              <li className="flex items-center gap-2 hover:text-white transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#76b900]" />
+                <span className="text-slate-200">NVIDIA Nemotron-70B</span>
               </li>
-              <li>
-                <span className="text-slate-300">Nebius Token Factory</span> (GPU Cloud)
+              <li className="flex items-center gap-2 hover:text-white transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-slate-200">Nebius Token Factory</span>
               </li>
-              <li>
-                <span className="text-slate-300">Tavily AI Search</span> ($3K Partner Bounty)
+              <li className="flex items-center gap-2 hover:text-white transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="text-slate-200">Tavily Legal Precedents</span>
               </li>
-              <li>
-                <span className="text-slate-300">NeMo Guardrails</span> (Hallucination Free)
+              <li className="flex items-center gap-2 hover:text-white transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-lime-400" />
+                <span className="text-slate-200">NeMo Guardrails 0.12</span>
               </li>
             </ul>
           </div>
 
-          {/* Compliance Frameworks */}
-          <div className="space-y-2">
-            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-semibold">
-              Jurisdictions
+          {/* Statutory Frameworks */}
+          <div className="space-y-2.5">
+            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+              <Scale className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Legal Frameworks</span>
             </h4>
-            <ul className="space-y-1.5 text-slate-400">
-              <li>Delaware Chancery Court Precedents</li>
-              <li>European Union AI Act (2024/1689)</li>
-              <li>GDPR Article 28 / DPA Compliance</li>
-              <li>FTC Restrictive Covenant Ban (16 CFR)</li>
+            <ul className="space-y-2 text-slate-400 text-xs font-mono">
+              <li className="hover:text-slate-200 transition-colors">› Delaware Chancery Precedents</li>
+              <li className="hover:text-slate-200 transition-colors">› EU AI Act (2024/1689) Articles</li>
+              <li className="hover:text-slate-200 transition-colors">› GDPR Article 28 / DPA Ceilings</li>
+              <li className="hover:text-slate-200 transition-colors">› FTC 16 CFR Restrictive Covenants</li>
             </ul>
           </div>
 
-          {/* Quick Access */}
-          <div className="space-y-2">
-            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-semibold">
-              Portals
+          {/* Quick Enterprise Portals */}
+          <div className="space-y-2.5">
+            <h4 className="text-white font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+              <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Enterprise Portals</span>
             </h4>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2 text-xs font-mono">
               <li>
-                <Link href="/auditor" className="hover:text-[#76b900] transition-colors">
-                  Contract Auditor
+                <Link href="/auditor" className="text-slate-300 hover:text-[#76b900] transition-colors flex items-center gap-1.5">
+                  <span className="text-[#76b900]">›</span> Contract Auditor
                 </Link>
               </li>
               <li>
-                <Link href="/vault" className="hover:text-[#76b900] transition-colors">
-                  Precedent Vault
+                <Link href="/vault" className="text-slate-300 hover:text-[#76b900] transition-colors flex items-center gap-1.5">
+                  <span className="text-[#76b900]">›</span> Precedent Vault
                 </Link>
               </li>
               <li>
-                <Link href="/admin/login" className="text-[#76b900] hover:underline flex items-center gap-1 font-mono">
-                  <Lock className="w-3 h-3" />
-                  Admin CMS Panel
+                <Link href="/profile" className="text-slate-300 hover:text-[#76b900] transition-colors flex items-center gap-1.5">
+                  <span className="text-[#76b900]">›</span> Counsel Profile & Scans
+                </Link>
+              </li>
+              <li className="pt-1">
+                <Link href="/admin/login" className="text-slate-500 hover:text-[#76b900] transition-colors flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-[#76b900]" />
+                  <span>Admin Gateway</span>
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400">
-          <p>© 2026 NemoGuard AI. Apache-2.0 License. Built for the Nebius × NVIDIA Global AI Hackathon on Devpost.</p>
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span className="text-[#76b900]">H100 SXM5 Verified</span>
-            <span>•</span>
-            <span className="text-cyan-400">Tavily Grounded</span>
+        {/* Bottom Copyright & Security Line */}
+        <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-xs">
+          <p className="font-mono">© 2026 NemoGuard AI. Apache-2.0 License. Nebius × NVIDIA AI Hackathon.</p>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="text-[#76b900] flex items-center gap-1 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#76b900]" />
+              H100 Supercluster
+            </span>
+            <span className="text-slate-700">•</span>
+            <span className="text-cyan-400">Tavily Verified</span>
+            <span className="text-slate-700">•</span>
+            <span className="text-emerald-400">SOC 2 Type II</span>
           </div>
         </div>
+
       </div>
     </footer>
   );

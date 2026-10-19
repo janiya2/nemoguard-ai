@@ -50,9 +50,23 @@ export interface LandingCMSData {
   activeModel: string;
   tavilySearchEnabled: boolean;
   riskThresholdSensitivity: number; // 1-10
+
+  // Branding & Logo Management
+  websiteLogoUrl: string;
+  websiteTitle: string;
+  websiteTagline: string;
+  faviconUrl: string;
+  brandAccentColor: string;
 }
 
 export const DEFAULT_CMS_DATA: LandingCMSData = {
+  // Branding
+  websiteLogoUrl: "/logo.png",
+  websiteTitle: "NEMOGUARD",
+  websiteTagline: "NVIDIA Nemotron × Nebius",
+  faviconUrl: "/icon.png",
+  brandAccentColor: "#76b900",
+
   announcementBadge: "⚡ POWERED BY NVIDIA NEMOTRON-70B ON NEBIUS TOKEN FACTORY",
   announcementActive: true,
   heroTitlePrefix: "Autonomous",
