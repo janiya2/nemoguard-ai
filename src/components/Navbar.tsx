@@ -103,10 +103,10 @@ export default function Navbar() {
           ) : (
             <Link
               href="/admin/dashboard"
-              className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 hover:border-amber-400 text-[11px] font-mono text-amber-300 transition-colors"
+              className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-rose-950/40 border border-rose-500/30 hover:border-rose-400 text-[11px] font-mono text-rose-300 transition-colors"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <span>Simulation Demo Mode</span>
+              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              <span>API Key Required</span>
             </Link>
           )}
 
