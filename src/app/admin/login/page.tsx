@@ -7,7 +7,7 @@ import { Shield, Lock, Key, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin@nemoguard.ai");
+  const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -18,20 +18,39 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
-    // Simple robust authentication simulation for hackathon demo
+    // Accept BLI (lexiguard2026) and NemoGuard credentials
     setTimeout(() => {
-      if (password === "nemoguard2026" || password === "admin" || password === "nvidia") {
+      const cleanUser = username.trim().toLowerCase();
+      const cleanPass = password.trim();
+
+      const isValidPassword = 
+        cleanPass === "lexiguard2026" || 
+        cleanPass === "nemoguard2026" || 
+        cleanPass === "admin" || 
+        cleanPass === "nvidia";
+
+      const isValidUser = 
+        cleanUser === "admin" || 
+        cleanUser === "admin@lexiguard.ai" || 
+        cleanUser === "admin@nemoguard.ai" ||
+        cleanUser.includes("admin") ||
+        cleanUser.includes("janitha");
+
+      if (isValidPassword) {
         if (typeof window !== "undefined") {
           localStorage.setItem("nemoguard_admin_authenticated", "true");
-          localStorage.setItem("nemoguard_admin_user", username);
+          const displayName = (cleanPass === "lexiguard2026" || cleanUser.includes("lexiguard") || cleanUser === "admin")
+            ? "Janitha Dilshan (Lead Architect)"
+            : username;
+          localStorage.setItem("nemoguard_admin_user", displayName);
           localStorage.setItem("nemoguard_admin_login_time", new Date().toISOString());
         }
         router.push("/admin/dashboard");
       } else {
-        setError("Invalid credentials. Please verify your admin master passkey.");
+        setError("Invalid credentials. You can use your BLI passkey 'lexiguard2026' or 'nemoguard2026'.");
         setLoading(false);
       }
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -83,7 +102,7 @@ export default function AdminLoginPage() {
                   Master Passkey
                 </label>
                 <span className="text-[11px] text-[#76b900] font-mono">
-                  Demo: nemoguard2026
+                  BLI: lexiguard2026
                 </span>
               </div>
               <div className="relative">
