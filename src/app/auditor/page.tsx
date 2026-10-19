@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Shield, 
@@ -39,18 +39,44 @@ export default function AuditorPage() {
   const [activeClauseTab, setActiveClauseTab] = useState<number>(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [savedToVault, setSavedToVault] = useState(false);
+  const [inputError, setInputError] = useState<string | null>(null);
+  const [gatewayStatus, setGatewayStatus] = useState<{ hasNebiusKey: boolean; activeModel: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/gateway")
+      .then(res => res.json())
+      .then(res => {
+        if (res.data) {
+          setGatewayStatus({
+            hasNebiusKey: Boolean(res.data.nebiusApiKey && res.data.nebiusApiKey.length > 10),
+            activeModel: res.data.activeModel || "nvidia/llama-3.1-nemotron-70b-instruct"
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSelectSample = (sample: SampleContract) => {
     setSelectedSample(sample.id);
     setContractTitle(sample.title);
     setContractText(sample.content);
     setAuditResult(null);
+    setInputError(null);
     setSavedToVault(false);
   };
 
   const handleRunAudit = async () => {
-    if (!contractText.trim()) return;
+    if (!contractText.trim()) {
+      setInputError("Contract text cannot be empty. Please enter contract terms to audit.");
+      return;
+    }
 
+    if (contractText.trim().length < 40) {
+      setInputError(`Contract text is too short (${contractText.trim().length} characters). A valid legal clause requires at least 40 characters.`);
+      return;
+    }
+
+    setInputError(null);
     setIsAuditing(true);
     setAuditResult(null);
     setSavedToVault(false);
@@ -79,8 +105,10 @@ export default function AuditorPage() {
       setAuditStep("4/4: Synthesizing lawyer-grade defensive redlines...");
       await new Promise(r => setTimeout(r, 500));
 
+      const data = await res.json();
+
       if (res.ok) {
-        const data = await res.json();
+        setInputError(null);
         setAuditResult(data);
         // Automatically persist audit record to Firestore
         try {
@@ -102,10 +130,10 @@ export default function AuditorPage() {
           console.warn("Auto-save notice:", saveErr);
         }
       } else {
-        alert("Audit execution error. Please try again.");
+        setInputError(data.error || "Audit failed. Please provide a valid legal contract clause.");
       }
     } catch (err: any) {
-      alert(`Audit failed: ${err.message}`);
+      setInputError(`Audit failed: ${err.message}`);
     } finally {
       setIsAuditing(false);
       setAuditStep("");
@@ -259,17 +287,48 @@ export default function AuditorPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 flex items-center justify-between">
-                <span>Contract Agreement Text (or Paste Below)</span>
-                <span className="text-[#76b900]">Legal Redline Ready</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-mono text-slate-400">
+                  Contract Agreement Text (or Paste Below)
+                </label>
+                <div className="flex items-center gap-2">
+                  {gatewayStatus?.hasNebiusKey ? (
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#76b900] animate-pulse" />
+                      Live Nebius H100 Connected
+                    </span>
+                  ) : (
+                    <Link
+                      href="/admin/dashboard"
+                      className="text-[10px] font-mono text-amber-300 bg-amber-950/40 border border-amber-500/30 hover:border-amber-400 px-2 py-0.5 rounded-full flex items-center gap-1.5 transition-colors"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      Demo Mode (No Key) • Connect in Admin ↗
+                    </Link>
+                  )}
+                  <span className="text-[10px] font-mono text-[#76b900] hidden sm:inline">Legal Redline Ready</span>
+                </div>
+              </div>
               <textarea
                 rows={13}
                 value={contractText}
-                onChange={(e) => setContractText(e.target.value)}
+                onChange={(e) => {
+                  setContractText(e.target.value);
+                  if (inputError) setInputError(null);
+                }}
                 placeholder="Paste contract text, clauses, or indemnification provisions..."
                 className="w-full p-4 rounded-2xl bg-black/70 border border-slate-700 focus:border-[#76b900] text-slate-200 font-mono text-xs leading-relaxed focus:outline-none shadow-inner"
               />
+
+              {inputError && (
+                <div className="mt-3 p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/60 text-rose-200 font-mono text-xs flex items-start gap-2.5 shadow-[0_0_20px_rgba(244,63,94,0.15)] animate-fadeIn">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <div className="font-bold text-rose-300">Contract Input Validation Error</div>
+                    <div className="text-[11px] leading-relaxed text-rose-200/90">{inputError}</div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -321,6 +380,31 @@ export default function AuditorPage() {
         <div id="legal-audit-report" className="mt-8 space-y-8 animate-fadeIn">
           {/* Top Score Banner */}
           <div className="p-6 sm:p-8 rounded-3xl border border-[#76b900]/40 bg-gradient-to-br from-slate-900 via-[#070b12] to-black shadow-[0_0_50px_rgba(118,185,0,0.15)]">
+            {/* Live vs Simulation Transparency Pill */}
+            {auditResult.telemetry?.isLiveNebius ? (
+              <div className="mb-4 px-3.5 py-2 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-mono text-xs flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#76b900] animate-pulse" />
+                <span className="font-bold">LIVE NVIDIA NEMOTRON-70B INFERENCE:</span>
+                <span>Powered by Nebius GPU Token Factory supercluster.</span>
+              </div>
+            ) : (
+              <div className="mb-4 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 font-mono text-xs flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>
+                    <strong className="text-amber-300">DEMO SIMULATION FALLBACK:</strong> No live Nebius API Key connected. Operating on local compliance reasoning rules.
+                  </span>
+                </div>
+                <Link
+                  href="/admin/dashboard"
+                  className="px-2.5 py-1 rounded-lg bg-black/60 border border-amber-500/40 hover:border-[#76b900] text-[#76b900] hover:text-white text-[11px] font-bold flex items-center gap-1 transition-colors"
+                >
+                  <span>Connect Live Nebius Key in Admin</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
+            )}
+
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -390,10 +474,12 @@ export default function AuditorPage() {
               </div>
 
               {/* Telemetry Info */}
-              <div className="text-[11px] text-slate-400 flex items-center gap-4">
+              <div className="text-[11px] text-slate-400 flex items-center gap-3">
                 <span>Latency: {auditResult.telemetry?.latencyMs}ms</span>
                 <span>•</span>
-                <span className="text-[#76b900]">Nebius Supercluster Active</span>
+                <span className={auditResult.telemetry?.isLiveNebius ? "text-[#76b900] font-bold" : "text-amber-400 font-bold"}>
+                  {auditResult.telemetry?.isLiveNebius ? "Live Nebius H100 Supercluster" : "Heuristic Simulation Fallback"}
+                </span>
               </div>
             </div>
           </div>

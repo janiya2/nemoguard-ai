@@ -5,8 +5,37 @@ export async function POST(req: NextRequest) {
   try {
     const { contractText, contractTitle, enableTavily = true, jurisdiction = "US / Delaware & Global" } = await req.json();
 
-    if (!contractText || contractText.trim().length === 0) {
-      return NextResponse.json({ error: "Contract text cannot be empty." }, { status: 400 });
+    if (!contractText || contractText.trim().length < 40) {
+      return NextResponse.json({
+        error: `Invalid Contract Input: The submitted text is too short (${contractText?.trim()?.length || 0} characters). A valid legal clause requires at least 40 characters. Please paste actual contract terms or select one of the Enterprise Sample Scenarios.`
+      }, { status: 400 });
+    }
+
+    const words = contractText.trim().split(/\s+/);
+    if (words.length < 6) {
+      return NextResponse.json({
+        error: "Invalid Contract Input: The submitted text lacks contractual sentence structure (at least 6 words required). Please enter contractual language or choose a preset template on the left."
+      }, { status: 400 });
+    }
+
+    // Reject pure random character spam (e.g. dfsdf / asdfghjk)
+    const legalOrCommonTokens = [
+      "agreement", "contract", "party", "parties", "shall", "clause", "section",
+      "liability", "customer", "provider", "client", "vendor", "law", "terms",
+      "rights", "breach", "confidential", "indemnif", "employee", "services",
+      "dispute", "notice", "termination", "herein", "whereof", "recipient",
+      "governing", "obligation", "warranty", "damages", "jurisdiction", "exclusive",
+      "intellectual", "property", "data", "affiliate", "hereunder", "provisions",
+      "the", "and", "or", "to", "in", "for", "with", "that", "this", "by", "from",
+      "not", "all", "any", "be", "is", "are"
+    ];
+    const textLower = contractText.toLowerCase();
+    const tokenMatches = legalOrCommonTokens.filter(token => textLower.includes(token)).length;
+
+    if (tokenMatches < 3) {
+      return NextResponse.json({
+        error: "Invalid Contract Input: The provided text does not contain recognizable contractual terms or coherent clauses. Please provide real legal provisions or click an Enterprise Scenario template on the left."
+      }, { status: 400 });
     }
 
     let nebiusApiKey = process.env.NEBIUS_API_KEY;
@@ -141,7 +170,6 @@ Respond with strict JSON ONLY in the following format:
 
     // High-Precision Autonomous NeMo Reasoning Fallback Engine
     // Generates mathematically precise clause-by-clause redlines and legal citations
-    const textLower = contractText.toLowerCase();
     const clauses: any[] = [];
     let riskScore = 45;
 
@@ -244,16 +272,22 @@ Respond with strict JSON ONLY in the following format:
       ],
       telemetry: {
         modelUsed: nebiusModel,
-        nebiusCluster: "Nebius Token Factory (H100 Supercluster - NeMo Guardrails)",
+        nebiusCluster: Boolean(nebiusApiKey && nebiusApiKey.length > 10)
+          ? "Nebius Token Factory (H100 Supercluster)"
+          : "Local Heuristic Engine (Simulation Fallback - No API Key)",
         latencyMs,
         tokensProcessed: Math.floor(contractText.length / 3.8) + 950,
-        tavilyCalls: tavilyPrecedents.length > 0 ? tavilyPrecedents.length : 3,
+        tavilyCalls: tavilyPrecedents.length,
         tavilyPrecedents: tavilyPrecedents.length > 0 ? tavilyPrecedents : [
           { title: "Delaware Chancery Court: ABRY Partners Doctrine on Indemnity Limits", url: "https://courts.delaware.gov" },
           { title: "FTC Non-Compete Rule 16 CFR Part 910 Comprehensive Analysis", url: "https://www.ftc.gov" },
           { title: "European Data Protection Board: Article 28 Standard Contractual Obligations", url: "https://edpb.europa.eu" }
         ],
         isLiveNebius: Boolean(nebiusApiKey && nebiusApiKey.length > 10),
+        engineMode: Boolean(nebiusApiKey && nebiusApiKey.length > 10) ? "LIVE_NEBIUS" : "SIMULATION_FALLBACK",
+        engineNotice: Boolean(nebiusApiKey && nebiusApiKey.length > 10)
+          ? "Live inference executing on Nebius Supercluster."
+          : "Operating in Heuristic Simulation Fallback. Connect your NEBIUS_API_KEY in the Admin Portal to run live NVIDIA Nemotron-70B inference."
       }
     });
 

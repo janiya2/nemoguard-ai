@@ -3,11 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Shield, Cpu, Lock, Sparkles, Database, Terminal, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasNebiusKey, setHasNebiusKey] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/gateway")
+      .then(res => res.json())
+      .then(res => {
+        if (res.data?.nebiusApiKey && res.data.nebiusApiKey.length > 10) {
+          setHasNebiusKey(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // If inside admin dashboard, the admin sidebar handles navigation
   const isAdminDashboard = pathname.startsWith("/admin/dashboard");
@@ -83,10 +95,20 @@ export default function Navbar() {
 
         {/* Live Cluster Status & CTA */}
         <div className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-[11px] font-mono text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-[#76b900] animate-pulse" />
-            <span>Nebius H100 Online</span>
-          </div>
+          {hasNebiusKey ? (
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-[11px] font-mono text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-[#76b900] animate-pulse" />
+              <span>Nebius H100 Online</span>
+            </div>
+          ) : (
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-500/30 hover:border-amber-400 text-[11px] font-mono text-amber-300 transition-colors"
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <span>Simulation Demo Mode</span>
+            </Link>
+          )}
 
           <Link
             href="/auditor"
