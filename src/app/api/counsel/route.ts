@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       isLiveProvider = true;
     } else if (nebiusApiKey.startsWith("nvapi-")) {
       apiEndpoint = "https://integrate.api.nvidia.com/v1/chat/completions";
-      nebiusModel = "nvidia/nemotron-3-super-120b-a12b";
+      nebiusModel = "meta/llama-3.2-11b-vision-instruct";
       isLiveProvider = true;
     } else if (nebiusApiKey.startsWith("tok_") || (nebiusApiKey.length > 20 && nebiusApiKey !== "nemoguard-h100-dev-hackathon-token-2026")) {
       apiEndpoint = `${nebiusBaseUrl}/chat/completions`;

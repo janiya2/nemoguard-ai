@@ -89,6 +89,33 @@ body {
   animation: cyber-pulse 2s infinite ease-in-out;
 }
 
+@keyframes cyber-breathe {
+  0%, 100% { transform: scale(1.02); opacity: 0.25; }
+  50% { transform: scale(1.06); opacity: 0.4; }
+}
+
+.animate-cyber-breathe {
+  animation: cyber-breathe 14s infinite ease-in-out;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s infinite ease-in-out;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(118, 185, 0, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(118, 185, 0, 0.65); }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s infinite ease-in-out;
+}
+
 /* Shimmer animation */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
@@ -152,6 +179,16 @@ body {
   animation: cyber-glow 3s ease-in-out infinite;
 }
 
+/* Cinematic slow zoom/breathe for backgrounds */
+@keyframes cyber-breathe {
+  0%, 100% { transform: scale(1.02); }
+  50% { transform: scale(1.07); }
+}
+
+.animate-cyber-breathe {
+  animation: cyber-breathe 22s ease-in-out infinite;
+}
+
 /* Print optimization for Official Legal Certificate & Audit Report */
 @media print {
   @page {
@@ -195,7 +232,8 @@ body {
   }
 
   /* Report root container */
-  #legal-audit-report {
+  #legal-audit-report,
+  #war-room-settlement-dossier {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;

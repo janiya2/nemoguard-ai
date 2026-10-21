@@ -768,10 +768,20 @@ ${redline}`;
 
           {/* High-tech Specs Badges */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <span className="text-[10px] sm:text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-[#76b900]" />
-              NeMo Guardrails 0.12
-            </span>
+            <Link
+              href="/guardrails"
+              className="text-[10px] sm:text-[11px] font-mono px-3 py-1 rounded-full bg-[#76b900]/15 hover:bg-[#76b900]/25 border border-[#76b900]/40 text-[#76b900] flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(118,185,0,0.15)] group"
+            >
+              <Zap className="w-3 h-3 text-[#76b900] group-hover:scale-110 transition-transform" />
+              <span>NeMo Guardrails Sandbox ⚡</span>
+            </Link>
+            <Link
+              href="/benchmark"
+              className="text-[10px] sm:text-[11px] font-mono px-3 py-1 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(0,240,255,0.15)] group"
+            >
+              <Activity className="w-3 h-3 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>H100 Benchmark Matrix 📊</span>
+            </Link>
             <span className="text-[10px] sm:text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center gap-1.5">
               <Zap className="w-3 h-3 text-cyan-400" />
               Tavily Precedent Engine
