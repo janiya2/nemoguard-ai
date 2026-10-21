@@ -3,10 +3,15 @@
 > **Built for the Nebius × NVIDIA Global AI Hackathon on Devpost ($50,000+ Prize Pool).**  
 > Powered by **NVIDIA Nemotron-70B** on **Nebius Token Factory** and **Tavily AI Search** ($3,000 Partner Bounty).
 
+[![Live Production Demo](https://img.shields.io/badge/Live_Demo-nemoguard--ai.vercel.app-76b900?style=for-the-badge&logo=vercel&logoColor=white)](https://nemoguard-ai.vercel.app/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![NVIDIA Nemotron](https://img.shields.io/badge/Model-nvidia%2Fllama--3.1--nemotron--70b-76b900.svg)](https://studio.nebius.ai/)
 [![Nebius Token Factory](https://img.shields.io/badge/Cloud-Nebius_H100_Supercluster-00f0ff.svg)](https://studio.nebius.ai/)
 [![Tavily Search](https://img.shields.io/badge/Bounty-Tavily_AI_Search_$3,000-emerald.svg)](https://tavily.com/)
+
+> 🌐 **Live Supercluster**: [https://nemoguard-ai.vercel.app](https://nemoguard-ai.vercel.app)  
+> 🔑 **1-Click Judge Demo Login**: [https://nemoguard-ai.vercel.app/admin/login](https://nemoguard-ai.vercel.app/admin/login)  
+> 🏛️ **Full Architectural Blueprint**: [`NEMOGUARD_AI_MASTER_BLUEPRINT.md`](./NEMOGUARD_AI_MASTER_BLUEPRINT.md)
 
 ---
 
