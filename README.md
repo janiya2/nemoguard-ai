@@ -34,21 +34,21 @@ Modern enterprise contracts are filled with hidden liability traps—such as uni
 
 ```mermaid
 graph TD
-    Client[Enterprise Counsel / User] -->|Contract Upload / Sample| UI[Next.js 15 Cyber Interface]
-    Admin[Chief Counsel Admin] -->|Real-time Control| AdminPortal[/admin/dashboard CMS]
-    AdminPortal -->|Dynamic Sync| DB[(Firebase Firestore)]
+    Client["Enterprise Counsel / User"] -->|Contract Upload / Sample| UI["Next.js 15 Cyber Interface"]
+    Admin["Chief Counsel Admin"] -->|Real-time Control| AdminPortal["Admin Dashboard CMS (/admin)"]
+    AdminPortal -->|Dynamic Sync| DB[("Firebase Firestore")]
     DB -->|Instant Updates| UI
 
-    UI -->|Contract Analysis Request| API[/api/audit]
-    API -->|Prompt & NeMo Guardrails| Nebius[Nebius Token Factory H100]
-    Nebius -->|nvidia/llama-3.1-nemotron-70b-instruct| Reasoning[Deep Legal Risk Synthesis]
+    UI -->|Contract Analysis Request| API["API Engine (/api/audit)"]
+    API -->|Prompt & NeMo Guardrails| Nebius["Nebius Token Factory H100"]
+    Nebius -->|nvidia/llama-3.1-nemotron-70b| Reasoning["Deep Legal Risk Synthesis"]
     
-    API -->|Live Precedent Query| Tavily[Tavily AI Search API]
-    Tavily -->|Delaware Chancery / SEC / FTC Case Law| Precedents[Statutory Authorities]
+    API -->|Live Precedent Query| Tavily["Tavily AI Search API"]
+    Tavily -->|Delaware Chancery / SEC / FTC| Precedents["Statutory Authorities"]
 
-    Reasoning & Precedents -->|Redline Diff & Risk Scoring| Results[Interactive Defense Matrix]
+    Reasoning & Precedents -->|Redline Diff & Risk Scoring| Results["Interactive Defense Matrix"]
     Results -->|Persist Audit Record| DB
-    Results -->|Export Official Report| PDF[Instant Printable Legal PDF]
+    Results -->|Export Official Report| PDF["Printable Legal PDF Brief"]
 ```
 
 ---

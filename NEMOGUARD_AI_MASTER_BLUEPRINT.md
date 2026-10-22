@@ -132,7 +132,7 @@ The project includes an end-to-end, TV-grade video production suite allowing 1-c
 | :---: | :--- | :---: | :---: | :--- |
 | **01** | `step_01_intro.mp3` | **107s** | 225 | Catastrophic uncapped indemnity problem, Lead Architect Janitha Dilshan spotlight, and 7-module roadmap intro. |
 | **02** | `step_02_landing.mp3` | **37s** | 82 | Cinematic console telemetry, $84.2M active liability counter, DGCL 88.4% health score, and <15ms NeMo edge gate. |
-| **03** | `step_03_auditor.mp3` | **49s** | 108 | Autonomous Delaware auditor, AST syntax tree decomposition, Tavily AI precedent search, bilateral redline diff (94 ➔ 12 risk). |
+| **03** | `step_03_auditor.mp3` | **42s** | 91 | Edge input validation test (defect alert), Nemotron-70B & Tavily AI Chancery audit, and court-ready legal PDF brief export. |
 | **04** | `step_04_vault.mp3` | **35s** | 80 | DGCL Precedent Vault, immutable SHA-256 checksums, tamper-proof Hash Checker, court-ready defense receipts. |
 | **05** | `step_05_war_room.mp3` | **43s** | 98 | 3-Agent Courtroom War Room: Nemotron-70B vs Llama-3.3-70B under Chancery Judge oversight with gavel consensus. |
 | **06** | `step_06_benchmark.mp3`| **40s** | 89 | Nebius 8x H100 Token Factory speed test (148.6 tps), sub-140ms TTFT, 64% compute waste reduction, $2.4M ROI. |
